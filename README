@@ -1,0 +1,50 @@
+# SQL connector
+
+<p align="center">
+<img src="images/golang.jpg" width="220">
+</p>
+
+## Overview
+
+The SQL Connector is a utility written in `Golang` that leverages the _PubSub_ protocol MQTT.
+The purpose is to download all the data from _N_ tables (either from 1 or _M_ different databases), group them in multiple MQTT messages that are sent to a given topic; the messages' payloads are then uploaded to _BigQuery_.
+The user, via a configuration file, can specify either all or a subset of the table’s columns to be selected.
+
+Since the queries are executed with a filter based on a given timestamp, in order to download only the latest data that were added to the table since the previous query execution, the user must specify, in the configuration file, the timestamp column’s name; the SQL column’s type can be, based on the different servers, either _TIMESTAMP_, _DATETIME_ or _DATETIME2_.
+
+## Features
+
+- Create _N_ SQL clients able to connect to multiple databases
+- _MySQL_, _PostgreSQL_ and _MySQLServer_ are supported
+- Download all the recent data from different tables and upload them to BigQuery
+- Utilizes multiple asynchronous threads to manage the connection to DB
+
+## Prerequisites
+
+- [Docker](https://www.docker.com/get-started/)
+- [Google Cloud credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc?hl=it#how-to)
+
+## Configuration
+
+The client's configuration is done via the _conf/conf.json_ file.
+The properties to set are defined below:
+
+- **driver**: the driver to use to connect to the server. Supported values are _mysql_, _mssql_ or _postgres_
+- **server**: the server's IP address
+- **user**: the username to login to the database server
+- **password**: the password to login to the database server
+- **port**: database's server port
+- **database**: the name of the databases to use
+- **sampling**: sampling time [ms] for the periodic execution of the query
+- **schema**: database's schema
+- **tableName**: the table from which download the data
+- **timestampColumnName**: the time/timestamp column’s name that is used for tracking data
+- **selectAllColumns**: flag that, if enabled, allows to download the data for all the table’s columns.
+- **columns**: works only with the above flag disabled. It's the list of table's columns which data needs to be downloaded
+
+The configuration of MQTT is done via the following properties:
+
+- **getIP**: flag that, if enabled, automatically gets the IP address from the available NIC
+- **createServer**: flag that allows to create the MQTT server’s connection
+- **serverName**: the server’s connection name
+- **publishTimeout**: the timeout [ms] used to send the MQTT messages
